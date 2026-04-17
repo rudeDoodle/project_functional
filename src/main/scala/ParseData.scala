@@ -21,7 +21,7 @@ object RenewableSystem {
 
   def parseRawData(jsonInput: String): Seq[RenewableRecord] = {
     try {
-      // 1. Isolate the part between "data":" and the next "
+      
       val startTag = "\"data\":\""
       val startIndex = jsonInput.indexOf(startTag)
 
@@ -36,7 +36,7 @@ object RenewableSystem {
 
       val cleanContent = rawContent.replace("\\n", "\n")
 
-  
+
       val lines = cleanContent.split("\n")
         .map(_.trim)
         .filter(_.nonEmpty)
