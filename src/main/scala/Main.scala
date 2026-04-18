@@ -105,7 +105,7 @@ object Main extends App {
     fetcher(start, end) match {
       case Right(csvData) =>
         val filename = s"$dataDir/${source.toLowerCase}.csv"
-        val wrapped = s"""{"data":"$csvData"}"""
+        val wrapped = s"""$csvData"""
         FileIO.writeToFile(wrapped, filename) match {
           case Right(_) => println(s"Success! Saved to $filename")
           case Left(err) => println(err)

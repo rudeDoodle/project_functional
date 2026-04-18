@@ -21,7 +21,7 @@ object RenewableSystem {
 
   def parseRawData(jsonInput: String): Seq[RenewableRecord] = {
     try {
-      
+
       val startTag = "\"data\":\""
       val startIndex = jsonInput.indexOf(startTag)
 
