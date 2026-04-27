@@ -111,4 +111,45 @@ object RenewableSystem {
     }
   }
 
+  def checkAlerts(records: Seq[RenewableRecord]): Seq[String] = {
+    if (records.isEmpty) return Nil
+
+    val vals = records.map(_.value)
+    val avg = vals.sum / vals.size
+
+    val lowThreshold = avg * 0.2
+    val zeroRuns = findZeroRuns(records)
+
+    val lowOutputAlerts = records
+      .filter(r => r.value < lowThreshold && r.value > 0)
+      .take(3)
+      .map(r => f"Low output detected: ${r.value}%.2f MW at ${r.startTime} (threshold: $lowThreshold%.2f MW)")
+
+    val zeroAlerts = if (zeroRuns > 0) {
+      Seq(s"Possible equipment malfunction: $zeroRuns consecutive zero-output readings detected")
+    } else Nil
+
+    val dropAlerts = detectSuddenDrops(records, avg)
+
+    lowOutputAlerts ++ zeroAlerts ++ dropAlerts
+  }
+
+  def findZeroRuns(records: Seq[RenewableRecord]): Int = {
+    records
+      .map(_.value)
+      .foldLeft((0, 0)) { case ((maxRun, current), v) =>
+        if (v == 0.0) (math.max(maxRun, current + 1), current + 1)
+        else (maxRun, 0)
+      }._1
+  }
+
+  def detectSuddenDrops(records: Seq[RenewableRecord], avg: Double): Seq[String] = {
+    val sorted = records.sortBy(_.startTime.toString)
+    sorted.sliding(2).flatMap {
+      case Seq(prev, curr) if prev.value > 0 && (prev.value - curr.value) / prev.value > 0.8 =>
+        Some(f"Sudden drop: ${prev.value}%.2f -> ${curr.value}%.2f MW at ${curr.startTime}")
+      case _ => None
+    }.take(3).toSeq
+  }
+
 }

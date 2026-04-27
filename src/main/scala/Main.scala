@@ -9,8 +9,9 @@ object Main extends App {
     println("2. Fetch Wind Data")
     println("3. Fetch Hydro Data")
     println("4. View Raw Data (File Reader)")
-    println("5. Run Data Analysis (Stats, Sort, Filter)") // The new option
-    println("6. Exit")
+    println("5. Run Data Analysis (Stats, Sort, Filter)")
+    println("6. Plant Overview (Generation & Storage)")
+    println("7. Exit")
   }
 
   def mainLoop(): Unit = {
@@ -19,7 +20,7 @@ object Main extends App {
     val choice = scala.io.StdIn.readLine()
 
     choice match {
-      case "6" => println("Goodbye.")
+      case "7" => println("Goodbye.")
       case _ =>
         handleChoice(choice)
         mainLoop()
@@ -32,9 +33,10 @@ object Main extends App {
     case "3" => getAndSave("Hydro", GetData.fetchHydro)
     case "4" => viewRawData()
     case "5" => runAnalysisWorkflow()
+    case "6" => plantOverview()
     case _   => println("Invalid option.")
   }
-  
+
   def viewRawData(): Unit = {
     print("Enter filename to view: ")
     val filename = scala.io.StdIn.readLine()
@@ -43,7 +45,7 @@ object Main extends App {
       case Left(err) => println(err)
     }
   }
-  
+
   def runAnalysisWorkflow(): Unit = {
     print("Analyze which file? (solar.csv, wind.csv, hydro.csv): ")
     val filename = scala.io.StdIn.readLine()
@@ -92,6 +94,55 @@ object Main extends App {
           }
         }
       case Left(err) => println(s"Error: $err")
+    }
+  }
+
+  def plantOverview(): Unit = {
+    val sources = List("solar", "wind", "hydro")
+
+    val allRecords = sources.flatMap { src =>
+      FileIO.readFile(s"$dataDir/$src.csv") match {
+        case Right(content) => RenewableSystem.parseRawData(content)
+        case Left(_) => Nil
+      }
+    }
+
+    if (allRecords.isEmpty) {
+      println("\nNo data files found. Fetch data first (options 1-3).")
+    } else {
+      println("\n" + "=" * 55)
+      println("         RENEWABLE ENERGY PLANT OVERVIEW")
+      println("=" * 55)
+
+      val grouped = allRecords.groupBy(_.sourceType)
+
+      grouped.foreach { case (source, records) =>
+        val sorted = records.sortBy(_.startTime.toString)
+        val total = records.map(_.value).sum
+        val avg = total / records.size
+        val latest = sorted.last
+        val peak = records.maxBy(_.value)
+        val lowest = records.minBy(_.value)
+        val timespan = s"${sorted.head.startTime.toLocalDate} to ${sorted.last.startTime.toLocalDate}"
+
+        println(s"\n--- $source (Dataset ${records.head.datasetId}) ---")
+        println(f"  Period:          $timespan")
+        println(f"  Total Records:   ${records.size}")
+        println(f"  Total Generated: $total%.2f MW")
+        println(f"  Average Output:  $avg%.2f MW")
+        println(f"  Peak Output:     ${peak.value}%.2f MW  (${peak.startTime})")
+        println(f"  Lowest Output:   ${lowest.value}%.2f MW  (${lowest.startTime})")
+        println(f"  Latest Reading:  ${latest.value}%.2f MW  (${latest.startTime})")
+
+        RenewableSystem.checkAlerts(records).foreach { alert =>
+          println(s"  [ALERT] $alert")
+        }
+      }
+
+      val grandTotal = allRecords.map(_.value).sum
+      println("\n" + "-" * 55)
+      println(f"  Combined Generation: $grandTotal%.2f MW across ${allRecords.size} records")
+      println("=" * 55)
     }
   }
 
