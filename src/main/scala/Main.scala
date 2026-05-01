@@ -1,8 +1,11 @@
+// Main application starting point
 object Main extends App {
+  // Ensure data directory exists first
   val dataDir = "data"
   val dir = new java.io.File(dataDir)
   if (!dir.exists()) dir.mkdirs()
 
+  // Function to display the main menu
   def printMenu(): Unit = {
     println("\n--- Renewable Energy Plant System ---")
     println("1. Fetch Solar Data")
@@ -14,6 +17,7 @@ object Main extends App {
     println("7. Exit")
   }
 
+  // Main loop to handle user interaction
   def mainLoop(): Unit = {
     printMenu()
     print("Choose option: ")
@@ -27,6 +31,7 @@ object Main extends App {
     }
   }
 
+  //Function to handle all different choices
   def handleChoice(choice: String): Unit = choice match {
     case "1" => getAndSave("Solar", GetData.fetchSolar)
     case "2" => getAndSave("Wind", GetData.fetchWind)
@@ -37,26 +42,31 @@ object Main extends App {
     case _   => println("Invalid option.")
   }
 
+  // Function for option 4 - view raw data from file
   def viewRawData(): Unit = {
     print("Enter filename to view: ")
     val filename = scala.io.StdIn.readLine()
     FileIO.readFile(s"$dataDir/$filename") match {
       case Right(content) => println(s"\n--- Raw Content ---\n$content")
+      // Return an error message if file cannot be read
       case Left(err) => println(err)
     }
   }
 
+  // Function for option 5 - run analysis workflow
   def runAnalysisWorkflow(): Unit = {
     print("Analyze which file? (solar.csv, wind.csv, hydro.csv): ")
     val filename = scala.io.StdIn.readLine()
 
     FileIO.readFile(s"$dataDir/$filename") match {
       case Right(content) =>
+        // If file can be read, parse the data
         val records = RenewableSystem.parseRawData(content)
 
         if (records.isEmpty) {
           println("No data found or file format incorrect.")
         } else {
+          // If data is found, present analysis options by time period or value range
           println(s"\n[System] Found ${records.size} records.")
           println("Select Analysis Mode:")
           println("1. Hourly Analysis")
@@ -69,14 +79,18 @@ object Main extends App {
 
           mode match {
             case "5" =>
+              // If the user selects to search by value range, request for minimum and maximum values
               print("Enter minimum value: ")
               val min = scala.io.StdIn.readDouble()
               print("Enter maximum value: ")
               val max = scala.io.StdIn.readDouble()
+
+              // Search for records that fall within the specified value range and display them
               val found = RenewableSystem.searchByValue(records, min, max)
               println(s"\nFound ${found.size} records in range:")
               found.foreach(r => println(s"Time: ${r.startTime} | Value: ${r.value}"))
 
+            // If user selects any analysis mode by time period, filter the records accordingly
             case m if List("1", "2", "3", "4").contains(m) =>
               val period = m match {
                 case "1" => "hourly"
@@ -84,19 +98,23 @@ object Main extends App {
                 case "3" => "weekly"
                 case "4" => "monthly"
               }
+              // Perform the analysis from "RenewableSystem" for the appropriate time period and display the results
               val groups = RenewableSystem.filterBy(records, period)
               groups.foreach { case (timeLabel, data) =>
                 println(s"\n--- Period: $timeLabel ---")
                 RenewableSystem.analyze(data)
               }
 
+            // In case of invalid analysis mode, display an error message
             case _ => println("Invalid analysis mode.")
           }
         }
+      // In case of failure reading the file, display an error message
       case Left(err) => println(s"Error: $err")
     }
   }
 
+  // Function for option 6 - plant overview
   def plantOverview(): Unit = {
     val sources = List("solar", "wind", "hydro")
 
@@ -108,14 +126,20 @@ object Main extends App {
     }
 
     if (allRecords.isEmpty) {
+      // If no data files are found, display a message prompting the user to fetch the data first
       println("\nNo data files found. Fetch data first (options 1-3).")
     } else {
+      /* If data is found, display a comprehensive overview of it, including a multitude
+       of statistics and insights for each energy source */
+
+      // Display a header for the overview section
       println("\n" + "=" * 55)
       println("         RENEWABLE ENERGY PLANT OVERVIEW")
       println("=" * 55)
 
       val grouped = allRecords.groupBy(_.sourceType)
 
+      // Display the statistics
       grouped.foreach { case (source, records) =>
         val sorted = records.sortBy(_.startTime.toString)
         val total = records.map(_.value).sum
@@ -134,11 +158,15 @@ object Main extends App {
         println(f"  Lowest Output:   ${lowest.value}%.2f MW  (${lowest.startTime})")
         println(f"  Latest Reading:  ${latest.value}%.2f MW  (${latest.startTime})")
 
+        // Check for and display alerts based on the latest reading
         RenewableSystem.checkAlerts(records).foreach { alert =>
           println(s"  [ALERT] $alert")
         }
       }
 
+      /* Display a closure header for the overview section as well as the sum of
+      all energy generated across all sources and records
+      */
       val grandTotal = allRecords.map(_.value).sum
       println("\n" + "-" * 55)
       println(f"  Combined Generation: $grandTotal%.2f MW across ${allRecords.size} records")
@@ -146,7 +174,9 @@ object Main extends App {
     }
   }
 
+  // Function used in options 1-3 to fetch data and save it to a file
   def getAndSave(source: String, fetcher: (String, String) => Either[String, String]): Unit = {
+    // Prompt the user to insert start and end dates for the data request
     println(s"Requesting $source data...")
     println("Start Date (YYYY-MM-DDTHH:MM:SSZ): ")
     val start = scala.io.StdIn.readLine()
@@ -159,8 +189,10 @@ object Main extends App {
         val wrapped = s"""$csvData"""
         FileIO.writeToFile(wrapped, filename) match {
           case Right(_) => println(s"Success! Saved to $filename")
+          // In case of failure to write the file, display an error message
           case Left(err) => println(err)
         }
+      // In case of failure to fetch the data, display an error message
       case Left(err) => println(s"Fetch failed: $err")
     }
   }

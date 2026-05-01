@@ -1,7 +1,7 @@
 import java.io.{PrintWriter, File, FileWriter}
 object FileIO {
-  //File Input and Output gets handled here
-//Write to the file, used for writing energy data
+  /* File Input and Output gets handled here
+ Write to the file, used for writing energy data */
 def writeToFile(data:String, path: String): Either[String,Unit] = {
   try {
     val pw = new PrintWriter(new File(path))
@@ -12,7 +12,7 @@ def writeToFile(data:String, path: String): Either[String,Unit] = {
     case e: Exception => Left(s"Error writing file: ${e.getMessage}")
   }
 }
-//append extra data to file
+// Append extra data to file
   def appendToFile(data: String, path: String): Either[String, Unit] = {
     try {
       val pw = new PrintWriter(new FileWriter(new File(path), true))
@@ -23,7 +23,7 @@ def writeToFile(data:String, path: String): Either[String,Unit] = {
       case e: Exception => Left(s"Error appending to file: ${e.getMessage}")
     }
   }
-//used for accessing data from the file
+// Used for accessing data from the file
   def readFile(path: String): Either[String, String] = {
     val file = new File(path)
     if (!file.exists()) {
