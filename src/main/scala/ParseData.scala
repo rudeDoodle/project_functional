@@ -99,12 +99,12 @@ object RenewableSystem {
     val midrange = (vals.last + vals.head) / 2.0
 
     println(f"Source: ${records.head.sourceType} (ID: ${records.head.datasetId})")
-    println(f"Records:  $size")
-    println(f"Mean:     $mean%.2f")
-    println(f"Median:   $median%.2f")
-    println(f"Mode:     $mode%.2f")
-    println(f"Range:    $range%.2f")
-    println(f"Midrange: $midrange%.2f")
+    println(f"Records:  $size  MW")
+    println(f"Mean:     $mean%.2f MW")
+    println(f"Median:   $median%.2f MW")
+    println(f"Mode:     $mode%.2f MW")
+    println(f"Range:    $range%.2f MW")
+    println(f"Midrange: $midrange%.2f MW")
     println("-" * 40)
   }
 
