@@ -6,7 +6,7 @@ object Main extends App {
   if (!dir.exists()) dir.mkdirs()
 
   // Function to display the main menu
-  def printMenu(): Unit = {
+  private def printMenu(): Unit = {
     println("\n--- Renewable Energy Plant System ---")
     println("1. Fetch Solar Data")
     println("2. Fetch Wind Data")
@@ -18,7 +18,7 @@ object Main extends App {
   }
 
   // Main loop to handle user interaction
-  def mainLoop(): Unit = {
+  private def mainLoop(): Unit = {
     printMenu()
     print("Choose option: ")
     val choice = scala.io.StdIn.readLine()
@@ -32,7 +32,7 @@ object Main extends App {
   }
 
   //Function to handle all different choices
-  def handleChoice(choice: String): Unit = choice match {
+  private def handleChoice(choice: String): Unit = choice match {
     case "1" => getAndSave("Solar", GetData.fetchSolar)
     case "2" => getAndSave("Wind", GetData.fetchWind)
     case "3" => getAndSave("Hydro", GetData.fetchHydro)
@@ -43,7 +43,7 @@ object Main extends App {
   }
 
   // Function for option 4 - view raw data from file
-  def viewRawData(): Unit = {
+  private def viewRawData(): Unit = {
     print("Enter filename to view: ")
     val filename = scala.io.StdIn.readLine()
     FileIO.readFile(s"$dataDir/$filename") match {
@@ -54,7 +54,7 @@ object Main extends App {
   }
 
   // Function for option 5 - run analysis workflow
-  def runAnalysisWorkflow(): Unit = {
+  private def runAnalysisWorkflow(): Unit = {
     print("Analyze which file? (solar.csv, wind.csv, hydro.csv): ")
     val filename = scala.io.StdIn.readLine()
 
@@ -115,7 +115,7 @@ object Main extends App {
   }
 
   // Function for option 6 - plant overview
-  def plantOverview(): Unit = {
+  private def plantOverview(): Unit = {
     val sources = List("solar", "wind", "hydro")
 
     val allRecords = sources.flatMap { src =>
@@ -175,7 +175,7 @@ object Main extends App {
   }
 
   // Function used in options 1-3 to fetch data and save it to a file
-  def getAndSave(source: String, fetcher: (String, String) => Either[String, String]): Unit = {
+  private def getAndSave(source: String, fetcher: (String, String) => Either[String, String]): Unit = {
     // Prompt the user to insert start and end dates for the data request
     println(s"Requesting $source data...")
     println("Start Date (YYYY-MM-DDTHH:MM:SSZ): ")

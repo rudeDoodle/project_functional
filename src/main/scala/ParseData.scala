@@ -16,7 +16,7 @@ case class RenewableRecord(
 object RenewableSystem {
 
   // Function to identify the energy source based on the dataset ID
-  def identifySource(id: Int): String = id match {
+  private def identifySource(id: Int): String = id match {
     case 191 => "Hydro"
     case 75 => "Wind"
     case 248 => "Solar"
@@ -76,7 +76,7 @@ object RenewableSystem {
   }
 
   // Function for sorting records by their value, ascending or descending
-  def sortByValue(records: Seq[RenewableRecord], ascending: Boolean = true): Seq[RenewableRecord] = {
+  private def sortByValue(records: Seq[RenewableRecord], ascending: Boolean = true): Seq[RenewableRecord] = {
     if (ascending) records.sortBy(_.value)
     else records.sortBy(_.value)(Ordering[Double].reverse)
   }
@@ -155,7 +155,7 @@ object RenewableSystem {
   }
 
   // Function for finding consecutive zero-output readings, which might indicate a malfunction
-  def findZeroRuns(records: Seq[RenewableRecord]): Int = {
+  private def findZeroRuns(records: Seq[RenewableRecord]): Int = {
     records
       .map(_.value)
       .foldLeft((0, 0)) { case ((maxRun, current), v) =>
@@ -165,7 +165,7 @@ object RenewableSystem {
   }
 
   // Function for detecting sudden drops in energy output
-  def detectSuddenDrops(records: Seq[RenewableRecord], avg: Double): Seq[String] = {
+  private def detectSuddenDrops(records: Seq[RenewableRecord], avg: Double): Seq[String] = {
     val sorted = records.sortBy(_.startTime.toString)
     sorted.sliding(2).flatMap {
       case Seq(prev, curr) if prev.value > 0 && (prev.value - curr.value) / prev.value > 0.8 =>

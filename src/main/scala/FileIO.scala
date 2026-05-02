@@ -13,7 +13,7 @@ def writeToFile(data:String, path: String): Either[String,Unit] = {
   }
 }
 // Append extra data to file
-  def appendToFile(data: String, path: String): Either[String, Unit] = {
+  private def appendToFile(data: String, path: String): Either[String, Unit] = {
     try {
       val pw = new PrintWriter(new FileWriter(new File(path), true))
       pw.write(data)

@@ -9,7 +9,7 @@ object GetData {
 
   /* Function for fetching the data from the API, takes the dataset ID and
   time range as parameters*/
-  def fetchData(dataID: Int, startTime: String, endTime: String):Either[String,String] = {
+  private def fetchData(dataID: Int, startTime: String, endTime: String):Either[String,String] = {
     val urlStr = s"$baseUrl/$dataID/data?startTime=$startTime&endTime=$endTime&format=csv&sortBy=startTime&sortOrder=asc"
     try {
       var url = new URL(urlStr)
