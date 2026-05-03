@@ -144,7 +144,18 @@ object RenewableSystem {
 
     // Generate an alert if there are consecutive zero-output readings
     val zeroAlerts = if (zeroRuns > 0) {
+      val isSolar = records.head.sourceType == "Solar"
+      if(isSolar){
+        val daytimeZeros = records.filter{r =>
+          val hour = r.startTime.getHour
+          r.value == 0.0 && hour>=6 && hour <= 20
+        }
+        if (daytimeZeros.size >= 3)
+          Seq(s"Possible equipment malfunction: ${daytimeZeros.size} zero-output readings during daylight hours")
+        else Nil
+      }else{
       Seq(s"Possible equipment malfunction: $zeroRuns consecutive zero-output readings detected")
+        }
     } else Nil
 
     // Detect sudden drops in energy output
