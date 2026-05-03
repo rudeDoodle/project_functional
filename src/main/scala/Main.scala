@@ -1,4 +1,7 @@
 // Main application starting point
+//Matei Crisan 002298276
+//Cristian-Mihai Radu 002293365
+//No AI was used in the writing of this code 
 object Main extends App {
   // Ensure data directory exists first
   val dataDir = "data"
