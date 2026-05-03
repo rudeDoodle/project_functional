@@ -114,7 +114,7 @@ object RenewableSystem {
       timeframe.toLowerCase match {
         case "hourly" => r.startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:00"))
         case "daily" => r.startTime.toLocalDate.toString
-        case "weekly" => s"Week ${r.startTime.get(java.time.temporal.IsoFields.WEEK_OF_WEEK_BASED_YEAR)}"
+        case "weekly" => f"Week ${r.startTime.get(java.time.temporal.IsoFields.WEEK_OF_WEEK_BASED_YEAR)}%02d"
         case "monthly" => r.startTime.getMonth.toString
         case _ => "All"
       }

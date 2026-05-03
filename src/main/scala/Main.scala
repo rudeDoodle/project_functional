@@ -100,7 +100,7 @@ object Main extends App {
               }
               // Perform the analysis from "RenewableSystem" for the appropriate time period and display the results
               val groups = RenewableSystem.filterBy(records, period)
-              groups.foreach { case (timeLabel, data) =>
+              groups.toSeq.sortBy(_._1).foreach { case (timeLabel, data) =>
                 println(s"\n--- Period: $timeLabel ---")
                 RenewableSystem.analyze(data)
               }
